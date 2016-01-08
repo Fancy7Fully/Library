@@ -1,0 +1,54 @@
+CS310: Operating Systems
+Project 0: Heap Manager
+Group Number: 18
+Group Members: Michael Liou, Reyina Senatus, Steven Pierre
+Time spent on project: ~20 hours total
+
+
+Implementation Details:
+
+********* Block Metadata: Headers **********
+
+We use the default header provided in dmm.c for the project. Each header
+contains size, *prev, and *next. Headers are added to both the free and allocated blocks. No footer is added. For allocated blocks,
+space for *next and *prev pointers are still available for simplicity of
+implementation. For more efficient results, allocated block header sizes can be
+decreased.
+
+
+************ Initialization: sbrk ***********
+
+dmalloc is initialized once with 1kb of heap size. The beginning of the heap is
+initialized to the start of the free list, and no additional heap size is
+requested by sbrk.
+
+************ dmalloc and dfree *************
+
+dmalloc returns the pointer past the header part of the block. If there is no
+more room on the heap, dmalloc will return NULL. dmalloc updates the static
+variable freelist depending on which block becomes allocated. The freelist is
+implemented as a linked list.
+
+dfree takes a pointer argument pointing to the beginning of the allocated block,
+just past the header. After freeing the block, the block is added back onto the
+freelist and coalesce is called within dfree for every call to dfree. Note: coalesce does not defragment any
+of the blocks to make additional room. coalesce method does not return anything
+and takes no argument. coalesce only combines blocks when address spaces are
+touching either at the end or beginning. Freelist updated for each coalesce call
+if necessary.
+
+
+********* Testing **********
+
+basicdmmtest -- Our implementation will NOT pass this test with an initial slab
+of 1kb. The initial heap size request must be increased. The requested dmalloc(940) will fail because we have initial dataspace
+of 1000 bytes with a 24 byte initial header. After the first dmalloc(10) call,
+this will allocate a block of 24 + 16 = 40 bytes, leaving 960 bytes. For the
+dmalloc(940) call, we would need 24 + 944 = 968 > 960 bytes.
+
+Tests were written during development to test the functionality of dmalloc, free,
+coalesce independently. A general test was also created to test all
+functionality together.
+
+Final versions of all files are on master branch of compsci310-fall15-group18
+
